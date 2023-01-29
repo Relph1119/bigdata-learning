@@ -17,18 +17,20 @@ import java.io.IOException;
 
 /**
  * 指定队列名称
- *
+ * <p>
  * Created by xuwei
  */
 public class WordCountJobQueue {
     /**
      * Map阶段
      */
-    public static class MyMapper extends Mapper<LongWritable, Text,Text,LongWritable>{
+    public static class MyMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
         Logger logger = LoggerFactory.getLogger(MyMapper.class);
+
         /**
          * 需要实现map函数
          * 这个map函数就是可以接收<k1,v1>，产生<k2，v2>
+         *
          * @param k1
          * @param v1
          * @param context
@@ -50,7 +52,7 @@ public class WordCountJobQueue {
                 Text k2 = new Text(word);
                 LongWritable v2 = new LongWritable(1L);
                 //把<k2,v2>写出去
-                context.write(k2,v2);
+                context.write(k2, v2);
             }
         }
     }
@@ -59,10 +61,12 @@ public class WordCountJobQueue {
     /**
      * Reduce阶段
      */
-    public static class MyReducer extends Reducer<Text,LongWritable,Text,LongWritable>{
+    public static class MyReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
         Logger logger = LoggerFactory.getLogger(MyReducer.class);
+
         /**
          * 针对<k2,{v2...}>的数据进行累加求和，并且最终把数据转化为k3,v3写出去
+         *
          * @param k2
          * @param v2s
          * @param context
@@ -75,7 +79,7 @@ public class WordCountJobQueue {
             //创建一个sum变量，保存v2s的和
             long sum = 0L;
             //对v2s中的数据进行累加求和
-            for(LongWritable v2: v2s){
+            for (LongWritable v2 : v2s) {
                 //输出k2,v2的值
                 //System.out.println("<k2,v2>=<"+k2.toString()+","+v2.get()+">");
                 //logger.info("<k2,v2>=<"+k2.toString()+","+v2.get()+">");
@@ -89,7 +93,7 @@ public class WordCountJobQueue {
             //System.out.println("<k3,v3>=<"+k3.toString()+","+v3.get()+">");
             //logger.info("<k3,v3>=<"+k3.toString()+","+v3.get()+">");
             // 把结果写出去
-            context.write(k3,v3);
+            context.write(k3, v3);
         }
     }
 
@@ -97,7 +101,7 @@ public class WordCountJobQueue {
      * 组装Job=Map+Reduce
      */
     public static void main(String[] args) {
-        try{
+        try {
 
             //指定Job需要的配置参数
             Configuration conf = new Configuration();
@@ -109,11 +113,11 @@ public class WordCountJobQueue {
 
             //注意了：这一行必须设置，否则在集群中执行的时候是找不到WordCountJob这个类的
             job.setJarByClass(WordCountJobQueue.class);
-            
+
             //指定输入路径（可以是文件，也可以是目录）
-            FileInputFormat.setInputPaths(job,new Path(remainingArgs[0]));
+            FileInputFormat.setInputPaths(job, new Path(remainingArgs[0]));
             //指定输出路径(只能指定一个不存在的目录)
-            FileOutputFormat.setOutputPath(job,new Path(remainingArgs[1]));
+            FileOutputFormat.setOutputPath(job, new Path(remainingArgs[1]));
 
             //指定map相关的代码
             job.setMapperClass(MyMapper.class);
@@ -132,7 +136,7 @@ public class WordCountJobQueue {
 
             //提交job
             job.waitForCompletion(true);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

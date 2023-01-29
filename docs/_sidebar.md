@@ -1,2 +1,3 @@
 * [目录](README.md)
-    * [阶段一 Hadoop](contents/ch01.md)
+    * [第1章 Hadoop](contents/ch01.md)
+    * [第2章 企业级解决方案](contents/ch02.md)

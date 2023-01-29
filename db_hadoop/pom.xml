@@ -31,8 +31,6 @@
             <version>1.7.10</version>
             <scope>provided</scope>
         </dependency>
-
-
     </dependencies>
 
     <build>

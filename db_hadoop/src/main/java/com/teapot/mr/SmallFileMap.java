@@ -30,6 +30,8 @@ public class SmallFileMap {
      * @throws Exception
      */
     private static void write(String inputDir,String outputDir) throws Exception{
+        // 设置上传权限
+        System.setProperty("HADOOP_USER_NAME", "root");
         //创建一个配置对象
         Configuration conf = new Configuration();
         //指定HDFS的地址
@@ -79,6 +81,8 @@ public class SmallFileMap {
      * @throws Exception
      */
     private static void read(String inputDir)throws Exception{
+        // 设置上传权限
+        System.setProperty("HADOOP_USER_NAME", "root");
         //创建一个配置对象
         Configuration conf = new Configuration();
         //指定HDFS的地址
@@ -96,6 +100,5 @@ public class SmallFileMap {
         }
         reader.close();
     }
-
 
 }

@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 
@@ -17,19 +18,19 @@ public class SmallFileSeq {
 
     public static void main(String[] args) throws Exception{
         //生成SequenceFile文件
-        write("D:\\smallFile","/seqFile");
+//        write("D:\\smallFile","/seqFile");
         //读取SequenceFile文件
         read("/seqFile");
     }
-
 
     /**
      * 生成SequenceFile文件
      * @param inputDir 输入目录-windows目录
      * @param outputFile 输出文件-hdfs文件
-     * @throws Exception
      */
     private static void write(String inputDir,String outputFile) throws Exception{
+        // 设置上传权限
+        System.setProperty("HADOOP_USER_NAME", "root");
         //创建一个配置对象
         Configuration conf = new Configuration();
         //指定HDFS的地址
@@ -78,9 +79,10 @@ public class SmallFileSeq {
     /**
      * 读取SequenceFile文件
      * @param inputFile SequenceFile文件路径
-     * @throws Exception
      */
     private static void read(String inputFile) throws Exception{
+        // 设置上传权限
+        System.setProperty("HADOOP_USER_NAME", "root");
         //创建一个配置对象
         Configuration conf = new Configuration();
         //指定HDFS的地址

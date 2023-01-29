@@ -9,7 +9,7 @@ import java.io.*;
  * Created by xuwei
  */
 public class HadoopSerialize {
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         //创建Student对象，并设置id和name属性
         StudentWritable studentWritable = new StudentWritable();
         studentWritable.setId(1L);
@@ -24,7 +24,7 @@ public class HadoopSerialize {
     }
 }
 
-class StudentWritable implements Writable{
+class StudentWritable implements Writable {
     private Long id;
     private String name;
 
