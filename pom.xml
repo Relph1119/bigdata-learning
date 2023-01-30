@@ -16,6 +16,7 @@
 
     <modules>
         <module>db_hadoop</module>
+        <module>db_hive</module>
     </modules>
 
 </project>
