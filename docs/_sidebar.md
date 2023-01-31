@@ -3,3 +3,4 @@
     * [第2章 企业级解决方案](contents/ch02.md)
     * [第3章 Flume](contents/ch03.md)
     * [第4章 Hive](contents/ch04.md)
+    * [第5章 Scala编程](contents/ch05.md)
