@@ -18,6 +18,6 @@
         <module>db_hadoop</module>
         <module>db_hive</module>
         <module>db_scala</module>
+        <module>db_spark</module>
     </modules>
-
 </project>

@@ -8,7 +8,6 @@
     <artifactId>db_hadoop</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
-
         <!-- hadoop的依赖 -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -30,6 +29,11 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.10</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.4.2</version>
         </dependency>
     </dependencies>
 

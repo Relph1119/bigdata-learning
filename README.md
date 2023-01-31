@@ -1,5 +1,5 @@
 # 大数据学习笔记
-主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive。
+主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark。
 
 ## 在线阅读地址
 在线阅读地址：https://relph1119.github.io/bigdata-learning
@@ -20,7 +20,8 @@
     ```shell
     export HADOOP_HOME=/data/soft/hadoop-3.2.0
     export HIVE_HOME=/data/soft/apache-hive-3.1.2-bin
-    export PATH=.:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HIVE_HOME/bin:$PATH
+    export SPARK_HOME=/data/soft/spark-3.1.3-bin-hadoop3.2
+    export PATH=.:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
     ```
 
 ### 大数据组件版本
@@ -29,7 +30,7 @@
 - Flume版本：1.9.0
 - Hive版本：3.1.2
 - MySQL版本：8.0.32-0buntu0.20.04.1 (Ubuntu)
-
+- Spark版本：3.1.3-bin-hadoop3.2
 
 ### 快速启动大数据组件
 - 启动Hadoop
@@ -48,6 +49,12 @@ systemctl enable mysql.service
 hiveserver2 &
 ```
 
+- 启动Spark HistoryServer
+```shell
+cd /data/soft/spark-3.1.3-bin-hadoop3.2
+sbin/start-history-server.sh
+```
+
 ### 大数据组件端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -55,6 +62,7 @@ hiveserver2 &
 - HDFS端口：9000
 - MySQL端口：3306
 - Hive端口：10000
+- Spark History Server界面：http://bigdata01:18080/
 
 ### 本地启动docsify
 ```shell
