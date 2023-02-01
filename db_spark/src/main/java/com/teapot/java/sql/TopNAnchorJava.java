@@ -1,5 +1,6 @@
 package com.teapot.java.sql;
 
+import com.teapot.java.TopNJava;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.sql.Dataset;
@@ -26,8 +27,10 @@ public class TopNAnchorJava {
                 .getOrCreate();
 
         //1：直接使用sparkSession中的load方式加载json数据
-        Dataset<Row> videoInfoDf = sparkSession.read().json("D:\\video_info.log");
-        Dataset<Row> giftRecordDf = sparkSession.read().json("D:\\gift_record.log");
+        String videoPath = TopNAnchorJava.class.getClassLoader().getResource("data/video_info.log").getPath();
+        String giftPath = TopNAnchorJava.class.getClassLoader().getResource("data/gift_record.log").getPath();
+        Dataset<Row> videoInfoDf = sparkSession.read().json(videoPath);
+        Dataset<Row> giftRecordDf = sparkSession.read().json(giftPath);
 
         //2：对这两份数据注册临时表
         videoInfoDf.createOrReplaceTempView("video_info");

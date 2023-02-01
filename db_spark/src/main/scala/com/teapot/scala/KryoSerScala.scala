@@ -20,7 +20,8 @@ object KryoSerScala {
 
     val dataRDD = sc.parallelize(Array("hello you", "hello me"))
     val wordsRDD = dataRDD.flatMap(_.split(" "))
-    val personRDD = wordsRDD.map(word => Person(word, 18)).persist(StorageLevel.MEMORY_ONLY_SER)
+    val personRDD = wordsRDD.map(word => Person(word, 18))
+      .persist(StorageLevel.MEMORY_ONLY_SER)
     personRDD.foreach(println(_))
 
     while (true) {

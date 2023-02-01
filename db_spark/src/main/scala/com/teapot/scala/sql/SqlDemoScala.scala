@@ -20,7 +20,8 @@ object SqlDemoScala {
       .getOrCreate()
 
     //读取json文件，获取DataFrame
-    val stuDf = sparkSession.read.json("D:\\student.json").as("stu")
+    val stuPath = getClass.getClassLoader.getResource("data/student.json").getPath
+    val stuDf = sparkSession.read.json(stuPath).as("stu")
 
     //查看DataFrame中的数据
     stuDf.show()

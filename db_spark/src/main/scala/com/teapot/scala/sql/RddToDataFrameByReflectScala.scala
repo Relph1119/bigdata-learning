@@ -21,7 +21,7 @@ object RddToDataFrameByReflectScala {
     //获取SparkContext
     val sc = sparkSession.sparkContext
 
-    val dataRDD = sc.parallelize(Array(("jack", 18), ("tom", 20), ("jessic", 30)))
+    val dataRDD = sc.parallelize(Array(("jack", 18), ("tom", 20), ("jessica", 30)))
 
     //基于反射直接将包含Student对象的dataRDD转换为dataFrame
 

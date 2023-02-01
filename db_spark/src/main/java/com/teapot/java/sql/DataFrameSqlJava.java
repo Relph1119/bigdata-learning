@@ -18,7 +18,8 @@ public class DataFrameSqlJava {
                 .appName("DataFrameSqlJava")
                 .config(conf)
                 .getOrCreate();
-        Dataset<Row> stuDf = sparkSession.read().json("D:\\student.json");
+        String stuPath = DataFrameSqlJava.class.getClassLoader().getResource("data/student.json").getPath();
+        Dataset<Row> stuDf = sparkSession.read().json(stuPath);
 
         //将Dataset<Row>注册为一个临时表
         stuDf.createOrReplaceTempView("student");

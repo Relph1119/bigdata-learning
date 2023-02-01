@@ -39,7 +39,7 @@ public class RddToDataFrameByProgramJava {
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(sparkSession.sparkContext());
         Tuple2<String, Integer> t1 = new Tuple2<>("jack", 18);
         Tuple2<String, Integer> t2 = new Tuple2<>("tom", 20);
-        Tuple2<String, Integer> t3 = new Tuple2<>("jessic", 30);
+        Tuple2<String, Integer> t3 = new Tuple2<>("jessica", 30);
         JavaRDD<Tuple2<String, Integer>> dataRDD = sc.parallelize(Arrays.asList(t1, t2, t3));
 
         //组装RDD

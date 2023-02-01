@@ -8,6 +8,9 @@ import org.apache.spark.{SparkConf, SparkContext}
  */
 object RepartitionOpScala {
   def main(args: Array[String]): Unit = {
+    // 设置上传权限
+    sys.props += (("HADOOP_USER_NAME", "root"))
+
     val conf = new SparkConf()
     conf.setAppName("RepartitionOpScala")
       .setMaster("local")

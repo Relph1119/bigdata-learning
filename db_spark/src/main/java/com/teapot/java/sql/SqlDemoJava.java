@@ -21,7 +21,8 @@ public class SqlDemoJava {
                 .config(conf)
                 .getOrCreate();
         //读取json文件，获取Dataset<Row>
-        Dataset<Row> stuDf = sparkSession.read().json("D:\\student.json").toDF();
+        String stuPath = SqlDemoJava.class.getClassLoader().getResource("data/student.json").getPath();
+        Dataset<Row> stuDf = sparkSession.read().json(stuPath).toDF();
 
         stuDf.show();
 

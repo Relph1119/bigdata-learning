@@ -18,7 +18,8 @@ object DataFrameSqlScala {
       .config(conf)
       .getOrCreate()
 
-    val stuDf = sparkSession.read.json("D:\\student.json")
+    val stuPath = getClass.getClassLoader.getResource("data/student.json").getPath
+    val stuDf = sparkSession.read.json(stuPath)
 
     //将DataFrame注册为一个临时表
     stuDf.createOrReplaceTempView("student")

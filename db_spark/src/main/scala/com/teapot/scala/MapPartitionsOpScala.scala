@@ -41,7 +41,6 @@ object MapPartitionsOpScala {
       result.toIterator
     }).reduce(_ + _)
 
-
     println("sum:" + sum)
 
     sc.stop()

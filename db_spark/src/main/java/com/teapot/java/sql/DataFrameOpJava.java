@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+
 import static org.apache.spark.sql.functions.col;
 
 /**
@@ -21,7 +22,8 @@ public class DataFrameOpJava {
                 .config(conf)
                 .getOrCreate();
         //读取json文件，获取Dataset<Row>
-        Dataset<Row> stuDf = sparkSession.read().json("D:\\student.json");
+        String stuPath = DataFrameOpJava.class.getClassLoader().getResource("data/student.json").getPath();
+        Dataset<Row> stuDf = sparkSession.read().json(stuPath);
 
         //打印schema信息
         stuDf.printSchema();
@@ -30,10 +32,10 @@ public class DataFrameOpJava {
         stuDf.show(2);
 
         //查询数据中的指定字段信息
-        stuDf.select("name","age").show();
+        stuDf.select("name", "age").show();
 
         //在使用select的时候可以对数据做一些操作，需要引入 import static org.apache.spark.sql.functions.col;
-        stuDf.select(col("name"),col("age").plus(1)).show();
+        stuDf.select(col("name"), col("age").plus(1)).show();
 
         //对数据进行过滤
         stuDf.filter(col("age").gt(18)).show();

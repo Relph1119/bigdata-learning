@@ -20,7 +20,8 @@ object LoadAndSaveOpScala {
       .getOrCreate()
 
     //读取数据
-    val stuDf = sparkSession.read.format("json").load("D:\\student.json")
+    val stuPath = getClass.getClassLoader.getResource("data/student.json").getPath
+    val stuDf = sparkSession.read.format("json").load(stuPath)
 
     //保存数据
     stuDf.select("name","age")

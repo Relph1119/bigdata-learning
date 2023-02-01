@@ -22,7 +22,7 @@ object RddToDataFrameByProgramScala {
     //获取SparkContext
     val sc = sparkSession.sparkContext
 
-    val dataRDD = sc.parallelize(Array(("jack", 18), ("tom", 20), ("jessic", 30)))
+    val dataRDD = sc.parallelize(Array(("jack", 18), ("tom", 20), ("jessica", 30)))
 
     //组装rowRDD
     val rowRDD = dataRDD.map(tup => Row(tup._1, tup._2))

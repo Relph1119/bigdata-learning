@@ -18,7 +18,8 @@ object DataFrameOpScala {
       .config(conf)
       .getOrCreate()
 
-    val stuDf = sparkSession.read.json("D:\\student.json")
+    val stuPath = getClass.getClassLoader.getResource("data/student.json").getPath
+    val stuDf = sparkSession.read.json(stuPath)
 
     //打印schema信息
     stuDf.printSchema()

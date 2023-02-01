@@ -12,11 +12,11 @@ object MoreParallelismScala {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
     conf.setAppName("MoreParallelismScala")
+//      .setMaster("local")
     //设置全局并行度
     //conf.set("spark.default.parallelism","5")
 
     val sc = new SparkContext(conf)
-
 
     val dataRDD = sc.parallelize(Array("hello", "you", "hello", "me", "hehe", "hello", "you", "hello", "me", "hehe"))
     dataRDD.map((_, 1))

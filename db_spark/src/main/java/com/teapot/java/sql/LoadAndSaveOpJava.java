@@ -22,7 +22,8 @@ public class LoadAndSaveOpJava {
                 .getOrCreate();
 
         //读取数据
-        Dataset<Row> stuDf = sparkSession.read().format("json").load("D:\\student.json");
+        String stuPath = LoadAndSaveOpJava.class.getClassLoader().getResource("data/student.json").getPath();
+        Dataset<Row> stuDf = sparkSession.read().format("json").load(stuPath);
 
         //保存数据
         stuDf.select("name","age")

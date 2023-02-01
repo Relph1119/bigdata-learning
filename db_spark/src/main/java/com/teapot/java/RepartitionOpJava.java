@@ -14,6 +14,7 @@ import java.util.Iterator;
  */
 public class RepartitionOpJava {
     public static void main(String[] args) {
+
         SparkConf conf = new SparkConf();
         conf.setAppName("RepartitionOpJava")
                 .setMaster("local");
@@ -24,7 +25,7 @@ public class RepartitionOpJava {
         dataRDD.repartition(3)
                 .foreachPartition((VoidFunction<Iterator<Integer>>) it -> {
                     System.out.println("==============");
-                    while (it.hasNext()){
+                    while (it.hasNext()) {
                         System.out.println(it.next());
                     }
                 });

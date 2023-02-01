@@ -23,8 +23,10 @@ object TopNAnchorScala {
       .getOrCreate()
 
     //1：直接使用sparkSession中的load方式加载json数据
-    val videoInfoDf = sparkSession.read.json("D:\\video_info.log")
-    val giftRecordDf = sparkSession.read.json("D:\\gift_record.log")
+    val videoPath = getClass.getClassLoader.getResource("data/video_info.log").getPath
+    val giftPath = getClass.getClassLoader.getResource("data/gift_record.log").getPath
+    val videoInfoDf = sparkSession.read.json(videoPath)
+    val giftRecordDf = sparkSession.read.json(giftPath)
 
     //2：对这两份数据注册临时表
     videoInfoDf.createOrReplaceTempView("video_info")
