@@ -26,6 +26,7 @@
     export HADOOP_HOME=/data/soft/hadoop-3.2.0
     export HIVE_HOME=/data/soft/apache-hive-3.1.2-bin
     export SPARK_HOME=/data/soft/spark-3.1.3-bin-hadoop3.2
+    export HADOOP_CLASSPATH=`${HADOOP_HOME}/bin/hadoop classpath`
     export PATH=.:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HIVE_HOME/bin:$SPARK_HOME/bin:$PATH
     ```
 
@@ -39,6 +40,7 @@
 - Zookeeper版本：3.5.8
 - Kafka版本：kafka_2.12-2.4.1
 - Redis版本：5.0.9
+- Flink版本：1.11.1
 
 ### 快速启动大数据组件
 - 启动Hadoop
@@ -79,6 +81,12 @@ bin/kafka-server-start.sh -daemon config/server.properties
 ```shell
 cd /data/soft/redis-5.0.9/
 redis-server redis.conf
+```
+
+- 启动Flink日志进程
+```shell
+cd /data/soft/flink-1.11.1
+bin/historyserver.sh start
 ```
 
 ### 大数据组件端口

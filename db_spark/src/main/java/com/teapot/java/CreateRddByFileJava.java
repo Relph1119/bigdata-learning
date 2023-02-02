@@ -18,7 +18,7 @@ public class CreateRddByFileJava {
                 .setMaster("local");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        String path = "D:\\hello.txt";
+        String path = CreateRddByFileJava.class.getClassLoader().getResource("data/hello.txt").getPath();
         path = "hdfs://bigdata01:9000/test/hello.txt";
         JavaRDD<String> rdd = sc.textFile(path, 2);
         //获取每一行数据的长度

@@ -21,5 +21,6 @@
         <module>db_spark</module>
         <module>db_kafka</module>
         <module>db_redis</module>
+        <module>db_flink</module>
     </modules>
 </project>

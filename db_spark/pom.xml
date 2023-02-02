@@ -61,6 +61,7 @@
                 <configuration>
                     <scalaCompatVersion>2.12</scalaCompatVersion>
                     <scalaVersion>2.12.10</scalaVersion>
+                    <encoding>UTF-8</encoding>
                 </configuration>
                 <executions>
                     <execution>
