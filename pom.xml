@@ -19,5 +19,6 @@
         <module>db_hive</module>
         <module>db_scala</module>
         <module>db_spark</module>
+        <module>db_kafka</module>
     </modules>
 </project>

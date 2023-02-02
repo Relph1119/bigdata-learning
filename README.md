@@ -13,6 +13,11 @@
 
 ### 环境准备
 1. [Vbox配置Ubuntu的内外网访问](https://www.bilibili.com/video/av635603180/?vd_source=f4026a4ceb494a56ed0e12df39ea2d37)：主要使用NAT和Host-Only保证内外网的访问。
+2. 关闭Ubuntu防火墙
+   ```shell
+   sudo apt-get install ufw
+   ufw disable
+   ```
 2. 在hosts文件中配置域名：bigdata01 {仅主机(Host-Only)网络的IP地址}
     - 查看`VirtualBox Host-Only Ethernet Adapter`网卡的IP设置，笔者的电脑设置为192.168.56.1
     - 查看Vbox上仅主机(Host-Only)网络的IP地址，笔者的电脑设置为192.168.56.101，所有虚拟机的对外访问地址就是这个地址。
@@ -31,6 +36,8 @@
 - Hive版本：3.1.2
 - MySQL版本：8.0.32-0buntu0.20.04.1 (Ubuntu)
 - Spark版本：3.1.3-bin-hadoop3.2
+- Zookeeper版本：3.5.8
+- Kafka版本：kafka_2.12-2.4.1
 
 ### 快速启动大数据组件
 - 启动Hadoop
@@ -55,6 +62,18 @@ cd /data/soft/spark-3.1.3-bin-hadoop3.2
 sbin/start-history-server.sh
 ```
 
+- 启动Zookeeper
+```shell
+cd /data/soft/apache-zookeeper-3.5.8-bin
+bin/zkServer.sh start
+```
+
+- 启动Kafka
+```shell
+cd /data/soft/kafka_2.12-2.4.1
+bin/kafka-server-start.sh -daemon config/server.properties
+```
+
 ### 大数据组件端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -63,6 +82,8 @@ sbin/start-history-server.sh
 - MySQL端口：3306
 - Hive端口：10000
 - Spark History Server界面：http://bigdata01:18080/
+- Zookeeper端口：2181
+- Kafka端口：9092
 
 ### 本地启动docsify
 ```shell
