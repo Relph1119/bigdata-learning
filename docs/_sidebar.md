@@ -8,3 +8,4 @@
     * [第7章 Spark性能优化](contents/ch07.md)
     * [第8章 数据仓库](contents/ch08.md)
     * [第9章 Kafka](contents/ch09.md)
+    * [第10章 Redis](contents/ch10.md)

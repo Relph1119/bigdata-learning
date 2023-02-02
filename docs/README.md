@@ -1,5 +1,5 @@
 # 大数据学习笔记 {docsify-ignore-all}
-主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark。
+主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark、Kafka、Redis。
 
 ## 在线阅读地址
 在线阅读地址：https://relph1119.github.io/bigdata-learning
@@ -38,6 +38,7 @@
 - Spark版本：3.1.3-bin-hadoop3.2
 - Zookeeper版本：3.5.8
 - Kafka版本：kafka_2.12-2.4.1
+- Redis版本：5.0.9
 
 ### 快速启动大数据组件
 - 启动Hadoop
@@ -74,6 +75,12 @@ cd /data/soft/kafka_2.12-2.4.1
 bin/kafka-server-start.sh -daemon config/server.properties
 ```
 
+- 启动Redis
+```shell
+cd /data/soft/redis-5.0.9/
+redis-server redis.conf
+```
+
 ### 大数据组件端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -84,6 +91,7 @@ bin/kafka-server-start.sh -daemon config/server.properties
 - Spark History Server界面：http://bigdata01:18080/
 - Zookeeper端口：2181
 - Kafka端口：9092
+- Redis端口：6379
 
 ### 本地启动docsify
 ```shell
