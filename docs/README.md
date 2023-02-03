@@ -1,5 +1,5 @@
 # 大数据学习笔记 {docsify-ignore-all}
-主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark、Kafka、Redis。
+主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark、Kafka、Redis、Flink等各个组件的理论，并通过代码实验，了解组件的使用。
 
 ## 在线阅读地址
 在线阅读地址：https://relph1119.github.io/bigdata-learning
