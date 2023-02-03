@@ -6,6 +6,7 @@ import org.apache.flink.streaming.api.windowing.time.Time
 
 /**
  * 需求：自定义MyTimeWindow
+ * 在bigdata01上运行nc -l 9001，再启动该程序
  * Created by xuwei
  */
 object MyTimeWindowScala {

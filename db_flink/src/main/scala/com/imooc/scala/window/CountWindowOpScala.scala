@@ -6,6 +6,8 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
  * CountWindow的使用
  * 1：滚动窗口
  * 2：滑动窗口
+ *
+ * 在bigdata01上运行nc -l 9001，再启动该程序
  * Created by xuwei
  */
 object CountWindowOpScala {
@@ -30,12 +32,12 @@ object CountWindowOpScala {
 
     //CountWindow之滑动窗口：每隔1个元素计算一次前5个元素
     text.flatMap(_.split(" "))
-        .map((_,1))
-        .keyBy(0)
-        //第一个参数：窗口大小，第二个参数：滑动间隔
-        .countWindow(5,1)
-        .sum(1)
-        .print()
+      .map((_, 1))
+      .keyBy(0)
+      //第一个参数：窗口大小，第二个参数：滑动间隔
+      .countWindow(5, 1)
+      .sum(1)
+      .print()
 
     env.execute("CountWindowOpScala")
 

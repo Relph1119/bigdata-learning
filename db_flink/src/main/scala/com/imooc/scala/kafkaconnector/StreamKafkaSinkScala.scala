@@ -10,6 +10,12 @@ import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkFixedPartiti
 
 /**
  * Flink向Kafka中生产数据
+ *
+ * 创建t3的Topic：
+ * cd /data/soft/kafka_2.12-2.4.1
+ * bin/kafka-topics.sh --create --zookeeper localhost:2181 --partitions 1 --replication-factor 1 --topic t3
+ *
+ * 开启Socket：nc -l 9001
  * Created by xuwei
  */
 object StreamKafkaSinkScala {
@@ -19,13 +25,12 @@ object StreamKafkaSinkScala {
     //开启checkpoint
     env.enableCheckpointing(5000)
 
-
     val text = env.socketTextStream("bigdata01", 9001)
 
     //指定FlinkKafkaProducer的相关配置
     val topic = "t3"
     val prop = new Properties()
-    prop.setProperty("bootstrap.servers","bigdata01:9092,bigdata02:9092,bigdata03:9092")
+    prop.setProperty("bootstrap.servers","bigdata01:9092")
 
     //指定kafka作为sink
     /*
@@ -38,7 +43,10 @@ object StreamKafkaSinkScala {
      如果写入了，那么在watermark的案例中，使用extractTimestamp()提起时间戳的时候
      就可以直接使用recordTimestamp即可，它表示的就是我们在这里写入的数据对应的timestamp
      */
-    val kafkaProducer = new FlinkKafkaProducer[String](topic, new KafkaSerializationSchemaWrapper[String](topic, null, false, new SimpleStringSchema()), prop, FlinkKafkaProducer.Semantic.EXACTLY_ONCE)
+    val kafkaProducer = new FlinkKafkaProducer[String](
+      topic,
+      new KafkaSerializationSchemaWrapper[String](topic, null, false, new SimpleStringSchema()),
+      prop, FlinkKafkaProducer.Semantic.EXACTLY_ONCE)
     text.addSink(kafkaProducer)
 
     env.execute("StreamKafkaSinkScala")

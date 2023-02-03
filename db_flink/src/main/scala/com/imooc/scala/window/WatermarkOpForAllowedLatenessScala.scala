@@ -42,7 +42,8 @@ object WatermarkOpForAllowedLatenessScala {
     })
 
     //分配(提取)时间戳和watermark
-    val waterMarkStream = tupStream.assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10)) //最大允许的数据乱序时间 10s
+    val waterMarkStream = tupStream.assignTimestampsAndWatermarks(
+      WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10)) //最大允许的数据乱序时间 10s
       .withTimestampAssigner(new SerializableTimestampAssigner[Tuple2[String, Long]] {
         val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         var currentMaxTimstamp = 0L

@@ -22,5 +22,6 @@
         <module>db_kafka</module>
         <module>db_redis</module>
         <module>db_flink</module>
+        <module>db_sparkstreaming</module>
     </modules>
 </project>

@@ -113,3 +113,4 @@ docsify serve ./docs
 4. 修改了db_spark的依赖库，使用对应Hadoop和Scala版本的库，并添加了log4j的配置文件，删除了红色的Log日志
 5. 第12周前3章内容，可以重点听，后面代码实战内容可以快速观看，由于需要数据接口校验码，无法获取数据进行案例实战
 6. 第13周主要学习第3章内容，其他内容可快速观看
+7. 第17周第2章的Watermark理论部分有缺少，可以查看这篇文章[带你理解并使用flink中的WaterMark机制](https://blog.csdn.net/Chenftli/article/details/124274118)

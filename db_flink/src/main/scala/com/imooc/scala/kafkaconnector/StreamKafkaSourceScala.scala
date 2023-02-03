@@ -11,10 +11,19 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 
 /**
  * Flink从kafka中消费数据
+ * 启动HDFS、Zookeeper、Kafka
+ * 创建t1的Topic：
+ * cd /data/soft/kafka_2.12-2.4.1
+ * bin/kafka-topics.sh --create --zookeeper localhost:2181 --partitions 1 --replication-factor 1 --topic t1
+ * 启动生产者：
+ * bin/kafka-console-producer.sh --broker-list localhost:9092 --topic t1
  * Created by xuwei
  */
 object StreamKafkaSourceScala {
   def main(args: Array[String]): Unit = {
+    // 设置上传权限
+    sys.props += (("HADOOP_USER_NAME", "root"))
+
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     //每隔5000 ms执行一次checkpoint(设置checkpoint的周期)
@@ -34,11 +43,10 @@ object StreamKafkaSourceScala {
     //设置状态数据存储的位置
     env.setStateBackend(new RocksDBStateBackend("hdfs://bigdata01:9000/flink/checkpoints",true))
 
-
     //指定FlinkKafkaConsumer相关配置
     val topic = "t1"
     val prop = new Properties()
-    prop.setProperty("bootstrap.servers","bigdata01:9092,bigdata02:9092,bigdata03:9092")
+    prop.setProperty("bootstrap.servers","bigdata01:9092")
     prop.setProperty("group.id","con1")
     val kafkaConsumer = new FlinkKafkaConsumer[String](topic, new SimpleStringSchema(), prop)
 
@@ -51,7 +59,6 @@ object StreamKafkaSourceScala {
     //kafkaConsumer.setStartFromLatest()
     //从指定的时间戳开始消费数据，对于每个分区，其时间戳大于或等于指定时间戳的记录将被作为起始位置
     //kafkaConsumer.setStartFromTimestamp(176288819)
-
 
     //指定kafka作为source
     import org.apache.flink.api.scala._

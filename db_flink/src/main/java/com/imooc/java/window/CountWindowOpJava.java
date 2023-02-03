@@ -10,6 +10,8 @@ import org.apache.flink.util.Collector;
  * CountWindow的使用
  * 1：滚动窗口
  * 2：滑动窗口
+ *
+ * 在bigdata01上运行nc -l 9001，再启动该程序
  * Created by xuwei
  */
 public class CountWindowOpJava {

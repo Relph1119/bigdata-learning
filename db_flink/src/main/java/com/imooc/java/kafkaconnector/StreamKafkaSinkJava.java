@@ -10,6 +10,11 @@ import java.util.Properties;
 
 /**
  * Flink向Kafka中生产数据
+ * 创建t3的Topic：
+ * cd /data/soft/kafka_2.12-2.4.1
+ * bin/kafka-topics.sh --create --zookeeper localhost:2181 --partitions 1 --replication-factor 1 --topic t3
+ *
+ * 开启Socket：nc -l 9001
  * Created by xuwei
  */
 public class StreamKafkaSinkJava {
@@ -21,10 +26,13 @@ public class StreamKafkaSinkJava {
         //指定FlinkKafkaProducer相关配置
         String topic = "t3";
         Properties prop = new Properties();
-        prop.setProperty("bootstrap.servers","bigdata01:9092,bigdata02:9092,bigdata03:9092");
+        prop.setProperty("bootstrap.servers","bigdata01:9092");
 
         //指定kafak作为sink
-        FlinkKafkaProducer<String> kafkaProducer = new FlinkKafkaProducer<>(topic, new KafkaSerializationSchemaWrapper<String>(topic, null, false, new SimpleStringSchema()), prop, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
+        FlinkKafkaProducer<String> kafkaProducer = new FlinkKafkaProducer<>(
+                topic,
+                new KafkaSerializationSchemaWrapper<String>(topic, null, false, new SimpleStringSchema()),
+                prop, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
         text.addSink(kafkaProducer);
 
         env.execute("StreamKafkaSinkJava");
