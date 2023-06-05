@@ -23,5 +23,6 @@
         <module>db_redis</module>
         <module>db_flink</module>
         <module>db_sparkstreaming</module>
+        <module>db_clickhouse</module>
     </modules>
 </project>
