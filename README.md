@@ -1,10 +1,13 @@
 # 大数据学习笔记
-主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark、Kafka、Redis、Flink等各个组件的理论，并通过代码实验，了解组件的使用。
+
+主要记录大数据学习的相关笔记，包括Hadoop、Flume、Hive、Scala、Spark、Kafka、Redis、Flink、ClickHouse、Doris等各个组件的理论，并通过代码实验，了解组件的使用。
 
 ## 在线阅读地址
+
 在线阅读地址：https://relph1119.github.io/bigdata-learning
 
 ## 环境安装
+
 - OpenJDK Java版本：1.8.0_352
 - Scala版本：2.12.11 
 - Ubuntu版本：20.04
@@ -12,6 +15,7 @@
 - 虚拟机配置：显存大小50MB，内存大小4GB，硬盘大小（动态）50GB
 
 ### 环境准备
+
 1. [Vbox配置Ubuntu的内外网访问](https://www.bilibili.com/video/av635603180/?vd_source=f4026a4ceb494a56ed0e12df39ea2d37)：主要使用NAT和Host-Only保证内外网的访问。
 2. 关闭Ubuntu防火墙
    ```shell
@@ -41,8 +45,10 @@
 - Kafka版本：kafka_2.12-2.4.1
 - Redis版本：5.0.9
 - Flink版本：1.11.1
+- ClickHouse版本：20.2.1
 
 ### 快速启动大数据组件
+
 - 启动Hadoop
 ```shell
 start-all.sh
@@ -89,6 +95,11 @@ cd /data/soft/flink-1.11.1
 bin/historyserver.sh start
 ```
 
+- 启动ClickHouse
+```shell
+sudo /etc/init.d/clickhouse-server start
+```
+
 ### 大数据组件端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -115,3 +126,9 @@ docsify serve ./docs
 6. 第13周主要学习第3章内容，其他内容可快速观看
 7. 第17周第2章的Watermark理论部分有缺少，可以查看这篇文章[带你理解并使用flink中的WaterMark机制](https://blog.csdn.net/Chenftli/article/details/124274118)
 8. 第18、19周的项目实战内容可以快速观看，由于需要数据接口校验码，无法获取数据进行案例实战
+
+## 学习资料
+
+【1】大数据体系课-慕课网2019年课程：学习注意事项提到的内容是来源于本资料的。  
+【2】《ClickHouse性能之巅：从架构设计解读性能之谜》：第12章的内容来源于本书。  
+【3】《Doris实时数仓实战》：第13章的内容来源于本书。
