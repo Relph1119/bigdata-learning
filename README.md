@@ -100,6 +100,14 @@ bin/historyserver.sh start
 sudo /etc/init.d/clickhouse-server start
 ```
 
+- 启动Doris
+```shell
+cd /data/soft/apache-doris-1.2.7-bin-x64/fe
+./bin/start_fe.sh --daemon
+cd /data/soft/apache-doris-1.2.7-bin-x64/be
+./bin/start_be.sh --daemon
+```
+
 ### 大数据组件端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -111,6 +119,8 @@ sudo /etc/init.d/clickhouse-server start
 - Zookeeper端口：2181
 - Kafka端口：9092
 - Redis端口：6379
+- Doris端口：9030
+- Doris元数据页面：http://192.168.56.101:8030/，用户名`root`，密码`root`
 
 ### 本地启动docsify
 ```shell
