@@ -1,0 +1,48 @@
+drop table if exists hw_dm.m_gd_hw_goods_sql_month ;
+CREATE TABLE `m_gd_hw_goods_sql_day` (
+  `sell_date` date NULL COMMENT "日历天",
+  `phj` varchar(20) NULL COMMENT "铺货季",
+  `brand_code` varchar(40) NULL COMMENT "品牌",
+  `qdpp_code` varchar(40) NULL COMMENT "渠道品牌",
+  `area_code` varchar(40) NULL COMMENT "区域",
+  `cms_code` varchar(40) NULL COMMENT "店仓",
+  `catagory` varchar(40) NULL COMMENT "品类",
+  `b_code` varchar(40) NULL COMMENT "大类",
+  `tag_price` decimal(16, 4) NULL COMMENT "吊牌价",
+  `sex` varchar(40) NULL COMMENT "性别",
+  `m_code` varchar(40) NULL COMMENT "中类",
+  `item_series` varchar(80) NULL COMMENT "系列",
+  `upanddown` varchar(80) NULL COMMENT "上下装",
+  `item_series_name` varchar(80) NULL COMMENT "大系列",
+  `item_series2_name` varchar(80) NULL COMMENT "子系列",
+  `list_date` date NULL COMMENT "上市日期",
+  `item_type` varchar(20) NULL COMMENT "商品货号，款+色",
+  `logsys` varchar(40) NULL COMMENT "系统来源",
+  `sys_create_time` datetime NULL COMMENT "数据日期",
+  `bq_stock_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "本期库存吊牌金额",
+  `bq_stock_qty` int(11) NULL DEFAULT "0" COMMENT "本期库存数量",
+  `bqlj_sales_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "本期累计零售吊牌金额",
+  `bqlj_sales_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "本期累计零售金额",
+  `bqlj_sales_qty` int(11) NULL DEFAULT "0" COMMENT "本期累计零售数量",
+  `bq_sales_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "本期零售吊牌金额",
+  `bq_sales_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "本期零售金额",
+  `bq_sales_qty` int(11) NULL DEFAULT "0" COMMENT "本期零售数量",
+  `tq_stock_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "同期库存吊牌金额",
+  `tq_stock_qty` int(11) NULL DEFAULT "0" COMMENT "同期库存数量",
+  `tqlj_sales_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "同期累计零售吊牌金额",
+  `tqlj_sales_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "同期累计零售金额",
+  `tqlj_sales_qty` int(11) NULL DEFAULT "0" COMMENT "同期累计零售数量",
+  `tq_sales_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "同期零售吊牌金额",
+  `tq_sales_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "同期零售金额",
+  `tq_sales_qty` int(11) NULL DEFAULT "0" COMMENT "同期零售数量",
+  `lastday_sales_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "昨天累计零售吊牌金额",
+  `lastday_stock_tag_money` decimal(22, 2) NULL DEFAULT "0" COMMENT "昨天库存吊牌金额"
+) ENGINE=OLAP
+DUPLICATE KEY(`sell_date`, `phj`, `brand_code`, `qdpp_code`, `area_code`, `cms_code`)
+COMMENT "商品售罄率（到天)"
+DISTRIBUTED BY HASH(`cms_code`) BUCKETS 8
+PROPERTIES (
+"replication_num" = "3",
+"in_memory" = "false",
+"storage_format" = "V2"
+);

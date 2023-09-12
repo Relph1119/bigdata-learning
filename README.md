@@ -104,6 +104,8 @@ sudo /etc/init.d/clickhouse-server start
 ```shell
 cd /data/soft/apache-doris-1.2.7-bin-x64/fe
 ./bin/start_fe.sh --daemon
+sysctl -w vm.max_map_count=2000000
+ulimit -n 65536
 cd /data/soft/apache-doris-1.2.7-bin-x64/be
 ./bin/start_be.sh --daemon
 ```

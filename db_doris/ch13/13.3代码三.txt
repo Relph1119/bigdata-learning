@@ -1,0 +1,138 @@
+/********************************************************************
+-- 作业名: m_gd_hw_goods_sql_day_xls.sql
+-- 目标表：hw_dm.m_gd_hw_goods_sql_day_xls 商品售罄率模型
+-- 脚本逻辑：合并商品销售、商品库存数据并计算本期、同期、昨日指标，关联维度写入目标表【暂时只统计最近93天的数据】
+-- 修改记录:
+-- 修改人      修改时间      修改内容
+-- wcb         2021-04-29    created 
+-- 
+--
+*********************************************************************/
+--动态分区表需要先清空表
+truncate table hw_dm.m_gd_hw_goods_sql_day_xls;
+--然后就算同环比，关联维度信息插入目标表
+with thb_rst as (
+select sell_date,--业务日期
+       cms_code,--CMS网点编号 
+       logsys,--数据来源
+       item_type,--款式代号，货号，款+色  
+       sum(bq_sales_qty) as bq_sales_qty,--本期销售数量
+       sum(bq_sales_money) as bq_sales_money,--本期销售金额
+       sum(bqlj_sales_qty) as bqlj_sales_qty,--本期累计零售数量
+       sum(bqlj_sales_money) as bqlj_sales_money,--本期累计零售金额
+       sum(bq_stock_qty) as bq_stock_qty, --本期库存数量 
+       sum(tq_sales_qty) as tq_sales_qty,--同期销售数量
+       sum(tq_sales_money) as tq_sales_money,--同期销售金额
+       sum(tqlj_sales_qty) as tqlj_sales_qty,--同期累计零售数量
+       sum(tqlj_sales_money) as tqlj_sales_money,--同期累计零售金额
+       sum(tq_stock_qty) as tq_stock_qty, --同期库存数量
+       sum(lastday_sales_qty) as lastday_sales_qty,--昨日销售数量
+       sum(lastday_stock_qty) as lastday_stock_qty --昨日库存数量
+from ( --本期统计
+select sell_date,--业务日期
+       cms_code,--CMS网点编号 
+       logsys,--数据来源
+       item_type,--款式代号，货号，款+色  
+       sales_qty as bq_sales_qty,--本期销售数量
+       sales_money as bq_sales_money,--本期销售金额
+       lj_sales_qty as bqlj_sales_qty,--本期累计零售数量
+       lj_sales_money as bqlj_sales_money,--本期累计零售金额
+       fin_qty as bq_stock_qty, --本期库存数量 
+       0 tq_sales_qty,--同期销售数量
+       0 tq_sales_money,--同期销售金额
+       0 tqlj_sales_qty,--同期累计零售数量
+       0 tqlj_sales_money,--同期累计零售金额
+       0 tq_stock_qty, --同期库存数量
+       0 lastday_sales_qty,--昨日销售数量
+       0 lastday_stock_qty --昨日库存数量
+ from hw_dws.a_ev_st_cms_sql_union_xls
+ where sell_date between date_add('${sys.bizdate}',-93) and '${sys.bizdate}'
+ union all --同期统计
+select cast(add_months(sell_date,12) as date) as sell_date,--业务日期
+       cms_code,--CMS网点编号 
+       logsys,--数据来源
+       item_type,--款式代号，货号，款+色 
+       0 as bq_sales_qty,--本期销售数量
+       0 as bq_sales_money,--本期销售金额
+       0 as bqlj_sales_qty,--本期累计零售数量
+       0 as bqlj_sales_money,--本期累计零售金额
+       0 as bq_stock_qty, --本期库存数量 
+       sales_qty as tq_sales_qty,--同期销售数量
+       sales_money as tq_sales_money,--同期销售金额
+       lj_sales_qty as tqlj_sales_qty,--同期累计零售数量
+       lj_sales_money as tqlj_sales_money,--同期累计零售金额
+       fin_qty as tq_stock_qty, --同期库存数量
+       0 lastday_sales_qty,--昨日销售数量
+       0 lastday_stock_qty --昨日库存数量
+ from hw_dws.a_ev_st_cms_sql_union_xls
+ where sell_date between add_months(date_add('${sys.bizdate}',-93),-12) and add_months('${sys.bizdate}',-12) --取去年同期的日期区间
+ union all --昨日统计
+select date_add(sell_date,1) as sell_date,--业务日期
+       cms_code,--CMS网点编号 
+       logsys,--数据来源
+       item_type,--款式代号，货号，款+色 
+       0 as bq_sales_qty,--本期销售数量
+       0 as bq_sales_money,--本期销售金额
+       0 as bqlj_sales_qty,--本期累计零售数量
+       0 as bqlj_sales_money,--本期累计零售金额
+       0 as bq_stock_qty, --本期库存数量 
+       0 as tq_sales_qty,--同期销售数量
+       0 as tq_sales_money,--同期销售金额
+       0 as tqlj_sales_qty,--同期累计零售数量
+       0 as tqlj_sales_money,--同期累计零售金额
+       0 as tq_stock_qty, --同期库存数量
+       sales_qty as lastday_sales_qty,--销售数量
+       fin_qty as lastday_stock_qty --库存数量
+ from hw_dws.a_ev_st_cms_sql_union_xls
+ where sell_date between date_add('${sys.bizdate}',-94) and date_add('${sys.bizdate}',-1)
+) x
+group by sell_date, cms_code,item_type,logsys )
+insert overwrite table hw_dm.m_gd_hw_goods_sql_day_xls
+select t.sell_date, --日历天 
+       c.phj, --配货季
+       c.brand_code, --品牌
+       b.qdpp_code,--渠道品牌
+       b.area_code, --区域
+       t.cms_code, --门店
+       c.catagory, --品类
+       b_code, --大类
+       c.tag_price, --吊牌价
+       c.sex, --性别
+       c.m_code, --中类
+       c.item_series, --系列
+       c.upanddown, --上下装
+       c.item_series_name, --大系列
+       c.item_series2_name, --子系列
+       c.list_date, --上市日期
+       t.item_type,--款式代号，货号，款+色 
+       t.bq_stock_qty * coalesce(c.tag_price,0) as bq_stock_tag_money, --本期库存吊牌金额
+       t.bq_stock_qty, --本期库存数量
+       t.bqlj_sales_qty * coalesce(c.tag_price,0) as bqlj_sales_tag_money, --本期累计零售吊牌金额
+       t.bqlj_sales_money, --本期累计零售金额
+       t.bqlj_sales_qty, --本期累计零售数量
+       t.bq_sales_qty * coalesce(c.tag_price,0) as bq_sales_tag_money, --本期零售吊牌金额
+       t.bq_sales_money, --本期零售金额
+       t.bq_sales_qty, --本期零售数量
+       t.tq_stock_qty * coalesce(c.tag_price,0) as tq_stock_tag_money, --同期库存吊牌金额
+       t.tq_stock_qty, --同期库存数量
+       t.tqlj_sales_qty * coalesce(c.tag_price,0) as tqlj_sales_tag_money, --同期累计零售吊牌金额
+       t.tqlj_sales_money, --同期累计零售金额
+       t.tqlj_sales_qty, --同期累计零售数量
+       t.tq_sales_qty * coalesce(c.tag_price,0) as tq_sales_tag_money, --同期零售吊牌金额
+       t.tq_sales_money, --同期零售金额
+       t.tq_sales_qty, --同期零售数量
+       t.lastday_sales_qty * coalesce(c.tag_price,0) as lastday_sales_tag_money, --昨天累计零售吊牌金额
+       t.lastday_stock_qty * coalesce(c.tag_price,0) as lastday_stock_tag_money, --昨天库存吊牌金额
+       t.logsys,--系统来源
+       current_timestamp() as sys_create_time --数据插入时间
+  from thb_rst t
+  left join hw_dim.d_ch_cms_info b on t.cms_code = b.cms_code
+                                    and b.dt = '${sys.bizdate}'
+                                    and t.logsys = b.logsys
+  left join hw_dim.d_gd_item_type_info c on t.item_type = c.item_type
+                                   and c.dt = '${sys.bizdate}'
+                                   and c.logsys = t.logsys
+ where c.brand_code not in ('PP007','PP030')  -- 不统计 迪桑特\可隆广宣品
+   and b.area_code not in ('DST006','KL005')  --2021-05-31 剔除电商区域数据
+   and t.sell_date >= date_add('${sys.bizdate}',-93) --取最近93天数据
+;

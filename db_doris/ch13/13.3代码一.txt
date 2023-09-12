@@ -1,0 +1,71 @@
+/********************************************************************
+-- 作业名: dwd_ret_sales_detail_xls.sql
+-- 目标表：hw_dm.dwd_ret_sales_detail_xls 商品售罄率模型
+-- 脚本逻辑：根据新零售系统提供的业务逻辑加工DWD层新零售销售数据
+-- 修改记录:
+-- 修改人      修改时间      修改内容
+-- qk          2021-04-29    created 
+--
+*********************************************************************/
+--按照分区删除目标表
+alter table hw_dwd.dwd_ret_sales_detail_xls drop if exists partition(dt='${sys.bizdate}');
+--插入当日数据
+insert overwrite table hw_dwd.dwd_ret_sales_detail_xls partition(dt='${sys.bizdate}')
+SELECT
+	'NEWRETAIL' AS logsys,--数据源
+	from_unixtime(unix_timestamp(hd.selldate),'yyyy-MM') AS year_month,--账期
+	cast (coalesce(substr(hd.selltime, 1, 2), '0') as int) + 1 as bill_hour,--小时
+	'直营零售' AS type_name,--类型
+	hd.storeid as store_code,--门店号
+	COALESCE(cms.cms_code,hd.storeid) as cms_code,
+	hd.selldate as sell_date,--销售日期
+	hd.billid as bill_code,--单据ID
+	dtt.series,--行项目
+	dtt.itemid as item_code,--物料
+	dtt.qty,--销售数量
+	dtt.factretailmoney AS money,--零售金额
+	dtt.realamount AS jsje,--结算金额
+	hd.vipid AS vip_code, --会员
+	hd.selltypecode AS xplx,--小票类型
+	COALESCE(store.dpdw,' ') as dpdw,--店铺定位
+	COALESCE(store.jytype,' ') AS dplx,--店铺类型
+	COALESCE(store.buid,' ') as bu_id,--事业部         （关联其他表的数据）
+	COALESCE(store.category,' ') as category,--经营类型
+	( dtt.qty * arc.retailprice ) AS tagmoney,--吊牌金额
+	COALESCE(arc.bcodeid,' ') as b_code,--大类
+	dtt.staffid as staff_code,--营业员
+	hd.uptime as update_time,
+	hd.upstaff as update_staff,--更新人
+	hd.uptimestamp as update_timestamp,
+	hd.salesmode as sales_mode,--销售类型
+	COALESCE(arc.brandid,' ') as brand_code,--商品品牌
+	COALESCE(store.managetype,' ') as managetype,	--管理类型
+	hd.status ,
+	current_timestamp as sys_create_time,
+	hd.cust_id AS cust_id--会员	
+FROM
+	(select * from bi_ods.o_or_xls_p_bl_sell_hd_f where 
+		dt = '${sys.bizdate}' 
+		and cancelsign = 'N' 
+		and storeid not in ('N5ZD','00L812') ----排除唯品会后台补单
+	) hd
+	JOIN (select * from bi_ods.o_or_xls_p_bl_sell_dt_f where 
+		dt = '${sys.bizdate}'
+		and cancelsign = 'N' 
+	) dtt ON hd.billid = dtt.billid
+	LEFT JOIN (select * from bi_ods.o_or_xls_p_arc_store_f where 
+		cancelsign = 'N'
+		and buid in ('BU002','BU006') 
+		and dt = '${sys.bizdate}'
+	) store ON hd.storeid = store.storeid
+	left JOIN  (select * from bi_ods.o_or_xls_d_arc_item_f where 
+		dt = '${sys.bizdate}'
+	) arc ON dtt.itemid = arc.itemid
+	left join (select * from hw_dim.d_ch_cms_info_xls where 
+		dt = '${sys.bizdate}'
+	) cms on hd.storeid = cms.store_code 
+	WHERE
+	 store.cancelsign = 'N'
+	AND store.buid in ('BU002','BU006') 
+	AND store.areaid <> 'KL005'
+	AND store.areaid <> 'DST006' ;

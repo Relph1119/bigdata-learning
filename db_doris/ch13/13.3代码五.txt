@@ -1,0 +1,170 @@
+ -- 连接到hive
+ CREATE CATALOG myhive WITH (
+    'type' = 'hive',
+    'default-database' = 'hw_dim',
+    'hive-conf-dir' = '/data/anta/hive/conf/'
+);
+-- set the HiveCatalog as the current catalog of the session
+USE CATALOG myhive;
+SET table.local-time-zone=UTC;	--设置时区
+SET table.dynamic-table-options.enabled=true;	--开启表配置
+SET table.sql-dialect=default; 	--默认的sql模式
+SET table.exec.state.ttl=3600s;	--设置ttl状态超时时间
+SET table.exec.mini-batch.enabled=true;
+SET table.exec.mini-batch.allow-latency=5s;
+SET table.exec.mini-batch.size=5000;
+-- 加载kafka topic数据
+DROP TABLE IF EXISTS myhive.hw_dwd.f_ev_so_sell_dt_flink;
+create table myhive.hw_dwd.f_ev_so_sell_dt_flink
+(	
+    SERIES DOUBLE, 
+    ITEMID STRING, 
+    BILLID STRING,  
+    QTY DOUBLE, 
+    FORMERRETAILPRICE DOUBLE, 
+    FACTRETAILPRICE DOUBLE,
+    FACTRETAILMONEY DOUBLE, 
+    RETURNQTY DOUBLE, 
+    REALPRICE DOUBLE, 
+    REALAMOUNT DOUBLE, 
+    CANCELSIGN STRING, 
+    UPTIME BIGINT
+) with (
+    'connector' = 'kafka',
+    'topic' = 'dbz-oracle-xlsdpp.XLS.P_BL_SELL_DT',
+    'properties.bootstrap.servers' = '192.168.80.1:9092,192.168.80.2:9092,192.168.80.3:9092,192.168.80.4:9092,192.168.80.5:9092',
+    'properties.group.id' = 'f_ev_so_sell_dt_flink',
+    'scan.startup.mode' = 'latest-offset',
+    'format' = 'debezium-json'
+);
+--加载kafka topic数据
+DROP TABLE IF EXISTS myhive.hw_dwd.f_ev_so_sell_hd_flink;
+CREATE TABLE myhive.hw_dwd.f_ev_so_sell_hd_flink (
+    SERIES DOUBLE, 
+    BILLID STRING, 
+    STOREID STRING, 
+    SELLDATE STRING,
+    SELLTIME STRING, 
+    SELLTYPECODE STRING, 
+    SELL_DATE AS TO_DATE(SUBSTR(CAST(TO_TIMESTAMP_LTZ(CAST(SELLDATE AS BIGINT),3) AS STRING),1,10)),	--生成日期字段通过解析原有字段
+    SELL_TIME AS TO_TIMESTAMP(CAST(TO_TIMESTAMP_LTZ(CAST(SELLDATE AS BIGINT),3) AS STRING)),			--日期的时间戳格式
+    SELLTIMESTAMP AS TO_TIMESTAMP(CONCAT(SUBSTR(CAST(TO_TIMESTAMP_LTZ(CAST(SELLDATE AS BIGINT),3) AS STRING),1,10),' ',SELLTIME)),	--销售时间戳
+    proctime as PROCTIME()	--加载fink 数据处理时间用于双流join
+) with (
+    'connector' = 'kafka',
+    'topic' = 'dbz-oracle-xlsdpp.XLS.P_BL_SELL_HD',
+    'properties.bootstrap.servers' = '192.168.80.1:9092,192.168.80.2:9092,192.168.80.3:9092,192.168.80.4:9092,192.168.80.5:9092',
+    'properties.group.id' = 'f_ev_so_sell_hd_flink',
+    'scan.startup.mode' = 'latest-offset',
+    'format' = 'debezium-json'
+);
+--创建kafka输出表 模式为upsert模式 数据格式为json
+DROP TABLE IF EXISTS myhive.hw_dm.m_re_hw_sales_real_hour_flink;
+CREATE TABLE myhive.hw_dm.dm_ret_hw_sales_real_hour_flink (
+    LOGSYS STRING,
+    SELL_HOUR STRING,
+    STORE_CODE STRING, 
+    CMS_CODE STRING,
+    ITEM_CODE STRING,
+    BILL_CODE STRING,
+    SELL_DATE DATE, 
+    B_CODE STRING,
+    XPLX STRING,
+    QDPP_CODE STRING,
+    AREA_CODE STRING,		
+    BAZAAR_TYPE STRING,
+    DPDW_CODE STRING,
+    JY_TYPE_CODE STRING,
+    QTY DOUBLE, 
+    JSJE DOUBLE,
+    TAGMONEY DOUBLE,
+    TD_FLAG DOUBLE,
+    PRIMARY KEY (STORE_CODE,ITEM_CODE) NOT ENFORCED
+) with (
+    'connector' = 'upsert-kafka',
+    'topic' = 'm_re_hw_sales_real_hour',
+    'properties.bootstrap.servers' = '192.168.80.1:9092,192.168.80.2:9092,192.168.80.3:9092,192.168.80.4:9092,192.168.80.5:9092',
+    'key.format' = 'json',
+    'value.format' = 'json'
+);
+--向kafka表插入数据
+INSERT INTO myhive.hw_dm.m_re_hw_sales_real_hour_flink
+SELECT * FROM(
+WITH total AS (
+	SELECT 
+            proctime,	--数据处理时间
+            hd.SELLTIME,--销售时间戳
+            SUBSTR(hd.SELLTIME,1,2) AS SELL_HOUR,	--小时
+            hd.STOREID AS STORE_CODE,				--门店
+    		COALESCE(cms.qdpp_code,' ') AS QDPP_CODE,	--渠道品牌
+    		COALESCE(cms.area_code,' ') AS AREA_CODE,	--区域
+    		COALESCE(cms.bazaar_type,' ') AS BAZAAR_TYPE,	--商场类型
+    		COALESCE(cms.dpdw,' ') AS DPDW_CODE,		--渠道品牌
+    		COALESCE(cms.jy_type,' ') AS JY_TYPE_CODE,	--经营形势
+    		COALESCE(cms.bu_id,' ') AS BU_ID,			--事业部编码
+            SELLTIMESTAMP,								--销售时间戳
+            COALESCE(cms.cms_code,' ') AS CMS_CODE,		--网点
+            hd.SELL_DATE,								--日期
+            hd.BILLID AS BILL_CODE,						--小票
+            dt.ITEMID AS ITEM_CODE,						--物料
+            hd.SELLTYPECODE AS XPLX,					--小票类型
+            COALESCE(item.b_code,' ') AS B_CODE,		--大类
+    		COALESCE(item.retail_price,0) AS TAGPRICE,	--吊牌
+            dt.QTY,										--数量
+            dt.FACTRETAILMONEY AS MONEY,				--金额
+            dt.REALAMOUNT AS JSJE ,						--结算金额
+    		COALESCE(td.td,0) AS TD_FLAG，				--同店标识
+			dt.series									--行标签号
+        FROM myhive.hw_dwd.f_ev_so_sell_hd_flink hd
+        join myhive.hw_dwd.f_ev_so_sell_dt_flink dt
+        on hd.BILLID = dt.BILLID 
+        left join d_ch_cms_info_xls 
+        /*+ OPTIONS('streaming-source.enable'='true',			--开启流式处理
+        'streaming-source.partition.include' = 'latest',		--加载最新分区数据
+        'streaming-source.monitor-interval' = '12 h',			--每隔12小时重新加载一次数据
+        'streaming-source.partition-order' = 'partition-name') */--分区名排序
+    FOR SYSTEM_TIME AS OF hd.proctime cms
+    on hd.STOREID = cms.store_code
+    LEFT JOIN d_gd_item_info_xls
+    /*+ OPTIONS('streaming-source.enable'='true', 
+        'streaming-source.partition.include' = 'latest', 
+        'streaming-source.monitor-interval' = '12 h',
+        'streaming-source.partition-order' = 'partition-name') */
+    FOR SYSTEM_TIME AS OF hd.proctime item
+    on dt.ITEMID = item.item_code
+    LEFT JOIN myhive.hw_dws.a_ev_so_td_day_xls
+    /*+ OPTIONS('streaming-source.enable'='true', 
+        'streaming-source.partition.include' = 'latest', 
+        'streaming-source.monitor-interval' = '12 h',
+        'streaming-source.partition-order' = 'partition-name') */
+    FOR SYSTEM_TIME AS OF hd.proctime td
+    on hd.SELL_DATE = td.calendar_day
+    and hd.STOREID = td.store_code
+    where dt.CANCELSIGN = 'N'
+    and hd.CANCELSIGN = 'N'
+    and cms.bu_id in ('HK002','HK003','BU002','BU006')
+    and cms.area_code not in ('KL005','DST006')
+    and hd.STOREID not in ('N5ZD','00L812')
+)
+    SELECT 
+    	'NEWRETAIL' AS LOGSYS,
+        SELL_HOUR, 
+        STORE_CODE,
+        CMS_CODE,
+    	ITEM_CODE,
+    	BILL_CODE,
+        SELL_DATE,
+        B_CODE,
+    	XPLX,
+    	QDPP_CODE,
+    	AREA_CODE,		
+    	BAZAAR_TYPE,
+    	DPDW_CODE,
+    	JY_TYPE_CODE,
+        QTY,
+		JSJE,
+    	QTY * TAGPRICE AS TAGMONEY,
+    	TD_FLAG,
+		series
+    FROM total
+);

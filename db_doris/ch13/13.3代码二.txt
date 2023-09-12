@@ -1,0 +1,115 @@
+/********************************************************************
+-- 作业名: dws_god_stock_sales_union.sql
+-- 目标表：hw_dws.dws_god_stock_sales_union 线下店铺和仓库的库存数据和销售数据汇总
+-- 脚本逻辑：合并店铺和仓库的库存数据和销售数据，加工售罄率指标
+-- 修改记录:
+-- 修改人      修改时间      修改内容
+-- wcb         2021-05-06    created 
+--
+*********************************************************************/
+--动态分区表需要先清空表
+truncate table hw_dws.dws_god_stock_sales_union;
+--先插入库存和零售汇总数据到临时表1
+with day_rst as (--加工自上线依赖的月末时点数据，end_date用于计算在途状态，计算完以后的状态按照start_date存储表中
+	select list_date as sell_date,trunc(list_date,'MM') as sell_start_date,substr(list_date,1,7) as ym
+	from (
+	select 
+		date_add('2020-01-01', idx) as list_date
+	from  
+		(select split(space(datediff('${sys.bizdate}' ,'2020-01-01')), ' ')  as x) t
+		lateral view 
+		posexplode(x) pe as idx, ele  ) x 
+)
+insert overwrite table hw_dws.dws_god_stock_sales_union
+select xx.sell_date, --业务日期
+       xx.cms_code, --CMS网点编号 
+       xx.item_type, --款式代号，货号，款+色 
+       xx.sales_qty, --销售数量
+       xx.sales_money, --销售金额
+       xx.bc_qty, --反算销售数量
+       xx.bc_money, --反算销售金额
+       xx.lj_sales_qty, --累计零售数量
+       xx.lj_sales_money, --累计零售金额
+       xx.phy_qty, --已入库库存数量 
+       xx.onway_qty, --在途库存数量 
+       xx.fin_qty, --财务库存数量 
+	   case when xx.qm_cnt > 0 then 'Y' else 'N' end qm_flag, --是否齐码
+       xx.logsys,--数据源
+       xx.data_source, --数据来源 
+       current_timestamp() as sys_create_time, --数据插入时间
+       substr(xx.sell_date,1,7) as ym --月份分区字段
+  from (
+	SELECT x.sell_date,--业务日期
+		   x.cms_code,--CMS网点编号 
+		   x.item_type,--款式代号，货号，款+色 
+           x.logsys,--数据源
+           x.data_source, --数据来源 
+		   sum(x.qm_cnt) as qm_cnt,--是否齐码
+		   sum(x.sales_qty) as sales_qty,--销售数量
+		   sum(x.sales_money) as sales_money,--销售金额
+		   sum(x.bc_qty) as bc_qty,--反算销售数量
+		   sum(x.bc_money) as bc_money,--反算销售金额
+		   sum(x.lj_sales_qty) as lj_sales_qty,--累计零售数量
+		   sum(x.lj_sales_money) as lj_sales_money,--累计零售金额
+		   sum(x.phy_qty) as phy_qty, --已入库库存数量 
+		   sum(x.onway_qty) as onway_qty, --在途库存数量 
+		   sum(x.fin_qty) as fin_qty  --财务库存数量 
+	  FROM (
+		 --每一天的当日销量统计
+		select t.sell_date,--业务日期
+ 			   t.cms_code,--CMS网点编号 
+			   t.item_type,--款式代号，货号，款+色 
+               t.logsys,--数据源
+               t.data_source, --数据来源 
+			   0 as qm_cnt,--是否齐码
+			   t.sales_qty,--销售数量
+			   t.sales_money,--销售金额
+			   t.bc_qty,--反算销售数量
+			   t.bc_money,--反算销售金额
+			   0 as lj_sales_qty,--累计零售数量
+			   0 as lj_sales_money,--累计零售金额
+			   0 phy_qty, --已入库库存数量 
+			   0 onway_qty, --在途库存数量 
+			   0 fin_qty --财务库存数量 
+		  from hw_dws.a_ev_so_store_sales_chain_xls t 
+		 union all
+		 --截止每一天的累计销量统计
+		select b.sell_date,--业务日期
+ 			   t.cms_code,--CMS网点编号 
+			   t.item_type,--款式代号，货号，款+色 
+               t.logsys,--数据源
+               t.data_source, --数据来源 
+			   0 as qm_cnt,--是否齐码
+			   0 as sales_qty,--销售数量
+			   0 as sales_money,--销售金额
+			   0 as bc_qty,--反算销售数量
+			   0 as bc_money,--反算销售金额
+			   t.lj_sales_qty,--累计零售数量
+			   t.lj_sales_money,--累计零售金额
+			   0 phy_qty, --已入库库存数量 
+			   0 onway_qty, --在途库存数量 
+			   0 fin_qty --财务库存数量 
+		  from hw_dws.a_ev_so_store_sales_chain_xls t,day_rst b 
+		 where t.sell_date <= b.sell_date
+		   and t.chain_end_date >= b.sell_date
+		 union all --线下门店每日库存状态
+		select t.stock_date,--业务日期
+ 			   t.cms_code,--CMS网点编号 
+			   t.item_type,--款式代号，货号，款+色 
+               'NEWRETAIL' as logsys,--数据源
+               t.data_source, --数据来源 
+			   case when qm_flag ='Y' then 1 else 0 end as qm_cnt,--是否齐码
+			   0 sales_qty,--销售数量
+			   0 sales_money,--销售金额
+			   0 as bc_qty,--反算销售数量
+			   0 as bc_money,--反算销售金额
+			   0 lj_sales_qty,--累计零售数量
+			   0 lj_sales_money,--累计零售金额
+			   t.phy_qty as phy_qty ,--累计已入库库存数量
+			   t.onway_qty as onway_qty ,--累计在途库存数量 
+			   t.fin_qty as fin_qty  --累计财务库存数量
+		 from hw_dws.a_ev_st_cms_stock_qm_xls t
+	--2021-05-28 新零售和EBI分开跑，两边互不依赖	where t.cms_code not in (select distinct cms_code from hw_dwd.f_ev_st_cms_stock_day_ebi where dt = '${sys.bizdate}')
+	   ) x
+	group by x.sell_date, x.cms_code, x.item_type, x.logsys,x.data_source ) xx
+;
