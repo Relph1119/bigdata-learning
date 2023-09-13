@@ -110,7 +110,7 @@ cd /data/soft/apache-doris-1.2.7-bin-x64/be
 ./bin/start_be.sh --daemon
 ```
 
-### 大数据组件端口
+### 大数据组件默认端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
 - Hadoop的YARN webui界面：http://bigdata01:8088
@@ -121,8 +121,9 @@ cd /data/soft/apache-doris-1.2.7-bin-x64/be
 - Zookeeper端口：2181
 - Kafka端口：9092
 - Redis端口：6379
+- ClickHouse端口：8123
 - Doris端口：9030
-- Doris元数据页面：http://192.168.56.101:8030/，用户名`root`，密码`root`
+- Doris元数据页面：http://192.168.56.101:8030/ ，用户名`root`，密码`root`
 
 ### 本地启动docsify
 ```shell
@@ -143,4 +144,4 @@ docsify serve ./docs
 
 【1】大数据体系课-慕课网2019年课程：学习注意事项提到的内容是来源于本资料的。  
 【2】《ClickHouse性能之巅：从架构设计解读性能之谜》：第12章的内容来源于本书。  
-【3】《Doris实时数仓实战》：第13章的内容来源于本书。
+【3】《Doris实时数仓实战》：第13、14章的内容来源于本书。
