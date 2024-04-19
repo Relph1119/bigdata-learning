@@ -47,6 +47,7 @@
 - Flink版本：1.11.1
 - ClickHouse版本：20.2.1
 - Doris版本：1.2.7
+- Nacos版本：2.3.2
 
 ### 快速启动大数据组件
 
@@ -111,6 +112,12 @@ cd /data/soft/apache-doris-1.2.7-bin-x64/be
 ./bin/start_be.sh --daemon
 ```
 
+- 启动Nacos
+```shell
+cd /data/soft/nacos/bin
+startup.sh -m standalone
+```
+
 ### 大数据组件默认端口
 
 - Hadoop的HDFS webui界面：http://bigdata01:9870
@@ -125,6 +132,7 @@ cd /data/soft/apache-doris-1.2.7-bin-x64/be
 - ClickHouse端口：8123
 - Doris端口：9030
 - Doris元数据页面：http://192.168.56.101:8030/ ，用户名`root`，密码`root`
+- Nacos端口：18848
 
 ### 本地启动docsify
 ```shell
